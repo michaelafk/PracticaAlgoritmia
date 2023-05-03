@@ -2,12 +2,23 @@ package com.example.practicafinalalgoritmia;
 
 import java.util.Iterator;
 
-public class UnsortedArrayMapping <K,V> implements Iterator{
+public class UnsortedArrayMapping <K,V>{
     /*
      * To change this license header, choose License Headers in Project Properties.
      * To change this template file, choose Tools | Templates
      * and open the template in the editor.
      */
+        protected class Pair {
+            private K key;
+            private V value;
+            private Pair(K key,V value){}
+            public K getKey(){
+                return key;
+            }
+            public V getValue(){
+                return value;
+            }
+        }
         private K[] keys;
         private V[]values;
         private int n;
@@ -65,16 +76,25 @@ public class UnsortedArrayMapping <K,V> implements Iterator{
         public boolean isEmpty() {
             return n == 0;
         }
+        public Iterator iterator(){
+            Iterator it = new IteratorUnsortedArrayMapping();
+            return it;
+        }
+        private class IteratorUnsortedArrayMapping implements Iterator{
+            private int idxIterator;
+            private IteratorUnsortedArrayMapping(){
+                idxIterator = 0;
+            }
+            @Override
+            public boolean hasNext() {
+                return idxIterator < n;
+            }
 
-    @Override
-    public boolean hasNext() {
-            return i!=n;
-    }
-
-    @Override
-    public Object next() {
-        Node node = new Node(Keys[i],Values[i]);
-        i++;
-        return node;
-    }
+            @Override
+            public Object next() {
+                Pair p = new Pair(keys[idxIterator],values[idxIterator]);
+                idxIterator++;
+                return p;
+            }
+        }
 }
