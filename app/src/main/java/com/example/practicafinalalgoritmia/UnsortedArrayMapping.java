@@ -11,7 +11,10 @@ public class UnsortedArrayMapping <K,V>{
         protected class Pair {
             private K key;
             private V value;
-            private Pair(K key,V value){}
+            private Pair(K key,V value){
+                this.key = key;
+                this.value = value;
+            }
             public K getKey(){
                 return key;
             }
@@ -22,7 +25,6 @@ public class UnsortedArrayMapping <K,V>{
         private K[] keys;
         private V[]values;
         private int n;
-        private int i;
 
         public UnsortedArrayMapping(int max) {
             n = 0;
@@ -45,14 +47,21 @@ public class UnsortedArrayMapping <K,V>{
         }
 
         public V put(K key, V value) {
-            if (get(key) != null) {
-                keys[n] = key;
-                values[n] = value;
-                n++;
-                return null;
-            } else {
-                return get(key);
+            int i = 0;
+            boolean trobat = false;
+            while(!trobat && i<n){
+                trobat = key.equals(keys[i]);
+                i++;
             }
+            if(trobat){
+                V prevalue = values[i-1];
+                values[i-1] = value;
+                return prevalue;
+            }
+            keys[n] = key;
+            values[n] = value;
+            n++;
+            return null;
         }
 
         public V remove(K key) {

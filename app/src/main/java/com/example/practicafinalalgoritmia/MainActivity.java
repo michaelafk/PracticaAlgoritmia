@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         MaxWidthDisplay = metrics.widthPixels;
         TextViewWidth = (MaxWidthDisplay/longitud) - 10;
         TextViewHeight = (MaxWidthDisplay/longitud) - 10;
-        ButtonHeight = (MaxWidthDisplay/9)-10;
-        ButtonWidth = (MaxWidthDisplay/9)-10;
+        ButtonHeight = (MaxWidthDisplay/8)-10;
+        ButtonWidth = (MaxWidthDisplay/8)-10;
         crearGraella();
         crearTeclat();
     }
@@ -86,8 +86,7 @@ public class MainActivity extends AppCompatActivity {
         Iterator it = registroPalabraActual.iterator();
         int j = 0;
         while(it.hasNext()){
-            UnsortedArrayMapping.Pair p =
-                    (UnsortedArrayMapping.Pair) it.next();
+            UnsortedArrayMapping.Pair p = (UnsortedArrayMapping.Pair) it.next();
             if(j == 9){
                 x = 0;
                 y=y+ButtonHeight;
@@ -107,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
         String text = ch.toString();
         aux.setText(text);
         aux.setBackground(gd);
-        aux.setWidth(ButtonWidth-5);
-        aux.setHeight(ButtonHeight-5);
+        aux.setWidth(ButtonWidth-10);
+        aux.setHeight(ButtonHeight-10);
         // Posicionar el TextView
         aux.setX(X);
         aux.setY(Y);
