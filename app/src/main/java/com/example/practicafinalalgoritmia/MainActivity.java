@@ -7,7 +7,9 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.practicafinalalgoritmia.EDyAII.UnsortedLinkedListSet;
@@ -79,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
     }
     public void crearTeclat(){
         ConstraintLayout constraintLayout = findViewById(R.id.layout);
-        int x = 30;
-        int y = MaxHeightDisplay-3*ButtonHeight;
+        int x = 0;
+        int y = MaxHeightDisplay-5*ButtonHeight;
         boolean change = true;
         CreateStructureMapping();
         Iterator it = registroPalabraActual.iterator();
@@ -92,22 +94,18 @@ public class MainActivity extends AppCompatActivity {
                 y=y+ButtonHeight;
                 j=0;
             }
-            x+=ButtonWidth;
             Button button = CreateButton(x,y,(Character)p.getKey());
             constraintLayout.addView(button);
             j++;
+            x+=ButtonWidth-6;
         }
     }
     public Button CreateButton(int X,int Y,Character ch){
         Button aux = new Button(this);
-        GradientDrawable gd = new GradientDrawable();
-        gd.setCornerRadius(5);
-        gd.setStroke(3, Color.GRAY);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ButtonHeight,ButtonWidth);
         String text = ch.toString();
         aux.setText(text);
-        aux.setBackground(gd);
-        aux.setWidth(ButtonWidth-10);
-        aux.setHeight(ButtonHeight-10);
+        aux.setLayoutParams(layoutParams);
         // Posicionar el TextView
         aux.setX(X);
         aux.setY(Y);
