@@ -89,6 +89,7 @@ public class UnsortedLinkedListSet<E> implements Set<E> {
             indexIterator= indexIterator.next;
 
             return elem;
+            
         }
     }
 }
