@@ -16,13 +16,14 @@ import android.widget.TextView;
 import com.example.practicafinalalgoritmia.EDyAII.UnsortedLinkedListSet;
 
 import java.util.Iterator;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     /*variables que me condicionan el juego*/
     public final int INTENTOS = 5;
     public final int LONGITUD = 7;
-    public int intentos_actual =INTENTOS;
-    public int longitud_palabra= LONGITUD;
+    public int intentos_actual = 0;
+    public int longitud_palabra = 0;
     /*fin de variables de condicionamiento de juego*/
     /*medidas para poder implementar los textviews*/
     public int MaxHeightDisplay;
@@ -127,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
         buttonEsborrar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 System.out.println("Esborrar!");
+
+
             }
         });
     }
@@ -142,18 +145,23 @@ public class MainActivity extends AppCompatActivity {
         params.width = buttonWidth;
         bottonComprobar.setLayoutParams(params);
         bottonComprobar.setY(MaxHeightDisplay - 7 * ButtonHeight);
-        bottonComprobar.setX(MaxWidthDisplay / 2 + (float)(buttonWidth * 0.05));
+        bottonComprobar.setX(MaxWidthDisplay / 2 + (float) (buttonWidth * 0.05));
         // Afegir el botó al layout
-        constraintLayout.addView(bottonComprobar);
+
         // Afegir la funcionalitat al botó
         bottonComprobar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                System.out.println("Esborrar!");
+                System.out.println("Comporbar");
+                if(intentos_actual<INTENTOS){
+                    intentos_actual++;
+                    longitud_palabra = 0;
+                }
+
             }
         });
+        constraintLayout.addView(bottonComprobar);
+
     }
-
-
 
 
     ;
@@ -164,13 +172,18 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                ConstraintLayout b = findViewById(R.id.layout);
-                b.setFocusable(true);
-                b.setEnabled(true);
-                b.setClickable(true);
-                TextView casilla = (TextView) b.getViewById(01);
-                casilla.setText(ch.toString());
-                casilla.setGravity(Gravity.CENTER_HORIZONTAL);
+                if (longitud_palabra < LONGITUD) {
+                    ConstraintLayout b = findViewById(R.id.layout);
+                    int posicion = (intentos_actual * 10) + longitud_palabra;
+
+                    TextView casilla = (TextView) b.getViewById(posicion);
+                    casilla.setTextColor(Color.GRAY);
+                    casilla.setText(ch.toString());
+                    casilla.setGravity(Gravity.CENTER_HORIZONTAL);
+
+                    longitud_palabra++;
+                }
+
             }
         });
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ButtonHeight, ButtonWidth);
@@ -204,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void CreateStructureMapping() {
-        char[] character = "abcdefghijklmnopqrstuvwxyzç".toCharArray();
+        char[] character = "abcdefghijklmnopqrstuvwxyzç".toUpperCase(Locale.ROOT).toCharArray();
         registroPalabraActual = new UnsortedArrayMapping<Character, UnsortedLinkedListSet<Integer>>(character.length);
         UnsortedLinkedListSet<Integer> listaPosPal;
         boolean change = true;
