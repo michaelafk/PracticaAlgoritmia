@@ -127,8 +127,14 @@ public class MainActivity extends AppCompatActivity {
         // Afegir la funcionalitat al botó
         buttonEsborrar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                System.out.println("Esborrar!");
+                if(longitud_palabra>=0 && longitud_palabra<=LONGITUD){
+                    ConstraintLayout b = findViewById(R.id.layout);
+                    int posicion = (intentos_actual * 10) + longitud_palabra;
 
+                    TextView casilla = (TextView) b.getViewById(posicion);
+                    casilla.setText("");
+                    if(longitud_palabra>0)longitud_palabra--;
+                }
 
             }
         });
