@@ -15,8 +15,14 @@ import android.widget.TextView;
 
 import com.example.practicafinalalgoritmia.EDyAII.UnsortedLinkedListSet;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity {
     /*variables que me condicionan el juego*/
@@ -39,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     /*fin de variables de etapa y posicionamiento*/
     /*estructuras que se van a usar globalmente*/
     public UnsortedArrayMapping registroPalabraActual;
+    public HashSet diccionario;
+    public TreeMap soluciones;
 
     /*fin de estructuras*/
     @Override
@@ -55,8 +63,36 @@ public class MainActivity extends AppCompatActivity {
         TextViewHeight = (MaxWidthDisplay / LONGITUD) - 10;
         ButtonHeight = (MaxWidthDisplay / 8) - 10;
         ButtonWidth = (MaxWidthDisplay / 8) - 10;
+        cargarDatos(longitud_palabra);
         crearGraella();
         crearTeclat();
+    }
+
+    private void cargarDatos(int longitudPalabra) {
+        diccionario =new HashSet<String>();
+        soluciones = new TreeMap<String,String>();
+        InputStream is = getResources().openRawResource(R.raw.paraules);
+        BufferedReader r = new BufferedReader(new InputStreamReader(is));
+        try {
+            String linea;
+            while ((linea = r.readLine()) != null) {
+                if((linea.length()-1)/2 ==longitudPalabra){
+                    String valor_palabra[] = linea.split(";");
+                    diccionario.add(valor_palabra[1]);
+                    soluciones.put(valor_palabra[0],valor_palabra[1]);
+
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                r.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void crearGraella() {
@@ -121,19 +157,18 @@ public class MainActivity extends AppCompatActivity {
         params.width = buttonWidth;
         buttonEsborrar.setLayoutParams(params);
         buttonEsborrar.setY(MaxHeightDisplay - 7 * ButtonHeight);
-        buttonEsborrar.setX(MaxWidthDisplay / 2 - (float) (buttonWidth + (buttonWidth * 0.05)));
+        buttonEsborrar.setX((MaxWidthDisplay >> 1) - (float) (buttonWidth + (buttonWidth * 0.05)));
         // Afegir el botó al layout
         constraintLayout.addView(buttonEsborrar);
         // Afegir la funcionalitat al botó
         buttonEsborrar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(longitud_palabra>=0 && longitud_palabra<=LONGITUD){
+                if (longitud_palabra > 0 && longitud_palabra <= LONGITUD) {
                     ConstraintLayout b = findViewById(R.id.layout);
                     int posicion = (intentos_actual * 10) + longitud_palabra;
-
-                    TextView casilla = (TextView) b.getViewById(posicion);
+                    TextView casilla = (TextView) b.getViewById(posicion-1);
                     casilla.setText("");
-                    if(longitud_palabra>0)longitud_palabra--;
+                    if (longitud_palabra > 0) longitud_palabra--;
                 }
 
             }
@@ -157,8 +192,7 @@ public class MainActivity extends AppCompatActivity {
         // Afegir la funcionalitat al botó
         bottonComprobar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                System.out.println("Comporbar");
-                if(intentos_actual<INTENTOS){
+                if (intentos_actual < INTENTOS) {
                     intentos_actual++;
                     longitud_palabra = 0;
                 }
