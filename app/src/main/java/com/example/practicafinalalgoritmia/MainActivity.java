@@ -3,6 +3,7 @@ package com.example.practicafinalalgoritmia;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.practicafinalalgoritmia.EDyAII.UnsortedLinkedListSet;
 
@@ -39,15 +41,10 @@ public class MainActivity extends AppCompatActivity {
     public int ButtonHeight;
     public int ButtonWidth;
     /*fin de medidas*/
-    /*variables para saber en que momento estoy de mi juego y en que posicion de la etapa*/
-    public int intentosActual = 0;
-    public int pospalabra = 0;
-    /*fin de variables de etapa y posicionamiento*/
     /*estructuras que se van a usar globalmente*/
     public UnsortedArrayMapping registroPalabraActual;
     public HashSet diccionario;
     public TreeMap soluciones;
-
     /*fin de estructuras*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +77,7 @@ public class MainActivity extends AppCompatActivity {
                     String valor_palabra[] = linea.split(";");
                     diccionario.add(valor_palabra[1]);
                     soluciones.put(valor_palabra[0],valor_palabra[1]);
-
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -192,9 +187,15 @@ public class MainActivity extends AppCompatActivity {
         // Afegir la funcionalitat al botó
         bottonComprobar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (intentos_actual < INTENTOS) {
+                if (longitud_palabra == LONGITUD) {
                     intentos_actual++;
                     longitud_palabra = 0;
+                }else{
+                    Context context = getApplicationContext();
+                    CharSequence text = "Paraula incompleta!";
+                    int duration = Toast.LENGTH_LONG;
+                    Toast toast = Toast.makeText(context,text,duration);
+                    toast.show();
                 }
 
             }
