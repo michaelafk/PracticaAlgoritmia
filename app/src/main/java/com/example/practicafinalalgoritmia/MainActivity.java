@@ -52,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     public UnsortedArrayMapping registroPalabraActual;
     public HashSet diccionario;
     public TreeMap<String, String> soluciones;
-
+    //-1 esta, value list como el teclado
+    public TreeMap<Character,Integer> restricciones;
 
     /*fin de estructuras*/
     @Override
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             while ((linea = r.readLine()) != null) {
                 if ((linea.length() - 1) / 2 == longitudPalabra) {
                     String valor_palabra[] = linea.split(";");
-                    diccionario.add(valor_palabra[1]);
+                    diccionario.add(valor_palabra[0]);
                     soluciones.put(valor_palabra[0],valor_palabra[1]);
                 }
 
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             if (letrasIguales.get()) {
-                // soluciones.put(slo);
+                //soluciones.put(soluciones.);
             }
 
         });
