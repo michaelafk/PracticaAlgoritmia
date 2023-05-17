@@ -2,8 +2,8 @@ package com.example.practicafinalalgoritmia;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -21,15 +21,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity {
     /*variables que me condicionan el juego*/
     public final int INTENTOS = 5;
-    public final int LONGITUD = 7;
+    public final int LONGITUD = 5;
     public int intentos_actual = 0;
     public int longitud_palabra = 0;
     /*fin de variables de condicionamiento de juego*/
@@ -41,10 +44,16 @@ public class MainActivity extends AppCompatActivity {
     public int ButtonHeight;
     public int ButtonWidth;
     /*fin de medidas*/
+    /*variables para saber en que momento estoy de mi juego y en que posicion de la etapa*/
+    public int intentosActual = 0;
+    public int pospalabra = 0;
+    /*fin de variables de etapa y posicionamiento*/
     /*estructuras que se van a usar globalmente*/
     public UnsortedArrayMapping registroPalabraActual;
     public HashSet diccionario;
-    public TreeMap soluciones;
+    public TreeMap<String, String> soluciones;
+
+
     /*fin de estructuras*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,18 +75,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cargarDatos(int longitudPalabra) {
-        diccionario =new HashSet<String>();
-        soluciones = new TreeMap<String,String>();
+        diccionario = new HashSet<String>();
+        soluciones = new TreeMap<String, String>();
         InputStream is = getResources().openRawResource(R.raw.paraules);
         BufferedReader r = new BufferedReader(new InputStreamReader(is));
         try {
             String linea;
             while ((linea = r.readLine()) != null) {
-                if((linea.length()-1)/2 ==longitudPalabra){
+                if ((linea.length() - 1) / 2 == longitudPalabra) {
                     String valor_palabra[] = linea.split(";");
                     diccionario.add(valor_palabra[1]);
                     soluciones.put(valor_palabra[0],valor_palabra[1]);
                 }
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,6 +98,44 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String agafaHTML(String palabra) throws IOException {
+        StringBuilder data = new StringBuilder();
+        try {
+            URL url = new URL(" https://www.vilaweb.cat/paraulogic/?diec=" + palabra);
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+            String line = in.readLine();
+            while (line!=null){
+                data.append(line);
+                line = in.readLine();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return data.toString();
+    }
+
+    private void logica(String palabraReferencia) {
+        AtomicBoolean letrasIguales = new AtomicBoolean(true);
+        soluciones.forEach((key, value) -> {
+
+            for (int i = 0; i < palabraReferencia.length(); i++) {
+                if ((key.charAt(i) != palabraReferencia.charAt(i))) {
+                    letrasIguales.set(false);
+                    break;
+                }
+            }
+            if (letrasIguales.get()) {
+                // soluciones.put(slo);
+            }
+
+        });
+
+
     }
 
     public void crearGraella() {
