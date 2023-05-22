@@ -138,6 +138,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    public String obtenirParaula(){
+        String aux = "";
+        for(int i = 0; i<longitud_palabra;i++){
+            TextView aux1 = (TextView) findViewById(Integer.parseInt(intentos_actual+""+i));
+            aux+=aux1.getText();
+        }
+        return aux;
+    }
 
     public void crearGraella() {
         ConstraintLayout constraintLayout = findViewById(R.id.layout);
@@ -222,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
     private void bottonComprobar(ConstraintLayout constraintLayout) {
         Button bottonComprobar = new Button(this);
         bottonComprobar.setText("Comprobar");
-
         int buttonWidth = 400;
         int buttonHeight = 200;
         ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
@@ -236,9 +243,19 @@ public class MainActivity extends AppCompatActivity {
         // Afegir la funcionalitat al botó
         bottonComprobar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                String paraula;
                 if (longitud_palabra == LONGITUD) {
-                    intentos_actual++;
-                    longitud_palabra = 0;
+                    //agafam la paraula dels text views
+                    paraula = obtenirParaula().toLowerCase(Locale.ROOT);
+                    //comprobam si existeix la paraula
+                    if(diccionario.contains(paraula)){
+                        //si existeix i per tant hem de omplir les restriccions
+                        //una vegada que hem fet ses reduccions i adiccions als conjunts
+                        //aumentam intentos_actual i posam longitud_palabra a 0
+                        intentos_actual++;
+                        longitud_palabra = 0;
+                    }
+                    System.out.println("La palabra introducida es: "+paraula);
                 }else{
                     Context context = getApplicationContext();
                     CharSequence text = "Paraula incompleta!";
