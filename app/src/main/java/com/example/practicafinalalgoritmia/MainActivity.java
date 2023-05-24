@@ -26,10 +26,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,12 +40,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_DEFINCION = "com.example.myfirstapp.DEFINICION";
     public static final String EXTRA_RESTRICCIONES = "com.example.myfirstapp.RESTRICCIONES";
     public static final String EXTRA_POSSIBLES_PARAULES = "com.example.myfirstapp.POSSIBLES_PARAULES";
-
     /*variables que me condicionan el juego*/
     public final int INTENTOS = 5;
     public final int LONGITUD = 5;
     public int intentos_actual = 0;
     public int longitud_palabra = 0;
+    public String Paraula_Seleccionada;
     /*fin de variables de condicionamiento de juego*/
     /*medidas para poder implementar los textviews*/
     public int MaxHeightDisplay;
@@ -59,10 +61,10 @@ public class MainActivity extends AppCompatActivity {
     /*fin de variables de etapa y posicionamiento*/
     /*estructuras que se van a usar globalmente*/
     public UnsortedArrayMapping registroPalabraActual;
-    public HashSet diccionario;
-    public TreeMap<String, String> soluciones;
+    public HashMap diccionario;
+    public TreeSet<String> soluciones;
     //-1 esta, value list como el teclado
-    public TreeMap<Character,Integer> restricciones;
+    public TreeMap<Character,UnsortedLinkedListSet<Integer>> restricciones; //si
     /*fin de estructuras*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         TextViewHeight = (MaxWidthDisplay / LONGITUD) - 10;
         ButtonHeight = (MaxWidthDisplay / 8) - 10;
         ButtonWidth = (MaxWidthDisplay / 8) - 10;
-        cargarDatos(longitud_palabra);
+        cargarDatos();
         crearGraella();
         crearTeclat();
     }
@@ -86,18 +88,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
     }
-    private void cargarDatos(int longitudPalabra) {
-        diccionario = new HashSet<String>();
-        soluciones = new TreeMap<String, String>();
+    private void cargarDatos() {
+        diccionario = new HashMap<String,String>();
+        soluciones = new TreeSet<String>();
         InputStream is = getResources().openRawResource(R.raw.paraules);
         BufferedReader r = new BufferedReader(new InputStreamReader(is));
         try {
             String linea;
             while ((linea = r.readLine()) != null) {
-                if ((linea.length() - 1) / 2 == longitudPalabra) {
+                if ((linea.length() - 1) / 2 == LONGITUD) {
                     String valor_palabra[] = linea.split(";");
-                    diccionario.add(valor_palabra[1]);
-                    soluciones.put(valor_palabra[0],valor_palabra[1]);
+                    diccionario.put(valor_palabra[1],valor_palabra[0]);
+                    soluciones.add(valor_palabra[1]);
                 }
 
             }
@@ -289,19 +291,19 @@ public class MainActivity extends AppCompatActivity {
                 String paraula;
                 if (longitud_palabra == LONGITUD) {
                     //agafam la paraula dels text views
-                    paraula = obtenirParaula().toLowerCase(Locale.ROOT);
+                    paraula = obtenirParaula().toLowerCase();
                     //comprobam si existeix la paraula
-                    if(diccionario.contains(paraula)){
+                    if(diccionario.containsKey(paraula)){
                         //si existeix i per tant hem de omplir les restriccions
+                        if(paraula.equals())
                         //una vegada que hem fet ses reduccions i adiccions als conjunts
                         //aumentam intentos_actual i posam longitud_palabra a 0
                         intentos_actual++;
                         longitud_palabra = 0;
+                        System.out.println("la paraula existeix");
                     }
-                   logica(" ");
+                   //logica(" ");
                     //startActivity(intentGanddor);
-                    System.out.println("La palabra introducida es: "+paraula);
-
                 }else{
                     Context context = getApplicationContext();
                     CharSequence text = "Paraula incompleta!";
