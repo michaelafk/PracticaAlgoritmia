@@ -12,6 +12,7 @@ public class PantallaGanador extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla_ganador);
         Intent intent= getIntent();
-        System.out.println(intent.getStringExtra("sad"));;
-    }
+        String palabra = intent.getStringExtra(MainActivity.EXTRA_PALABRA);
+        String defincio= intent.getStringExtra(MainActivity.EXTRA_DEFINCION);
+        }
 }
