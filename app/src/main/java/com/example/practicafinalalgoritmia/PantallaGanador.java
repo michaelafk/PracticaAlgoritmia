@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 
 public class PantallaGanador extends AppCompatActivity {
 
@@ -14,5 +15,12 @@ public class PantallaGanador extends AppCompatActivity {
         Intent intent= getIntent();
         String palabra = intent.getStringExtra(MainActivity.EXTRA_PALABRA);
         String defincio= intent.getStringExtra(MainActivity.EXTRA_DEFINCION);
+
+        TextView palabraTextView = (TextView) findViewById(R.id.textViewParaulaGanador);
+        TextView definicioTextView = (TextView) findViewById(R.id.textViewDefinicionGanador);
+
+        palabraTextView.setText(palabra);
+        definicioTextView.setText(defincio);
+
         }
 }

@@ -2,6 +2,7 @@ package com.example.practicafinalalgoritmia;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -24,6 +25,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -64,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
     public HashMap diccionario;
     public TreeSet<String> soluciones;
     //-1 esta, value list como el teclado
-    public TreeMap<Character,UnsortedLinkedListSet<Integer>> restricciones; //si
+    public TreeMap<Character, UnsortedLinkedListSet<Integer>> restricciones; //si
+
     /*fin de estructuras*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,12 +88,14 @@ public class MainActivity extends AppCompatActivity {
         crearGraella();
         crearTeclat();
     }
+
     @Override
     protected void onStart() {
         super.onStart();
     }
+
     private void cargarDatos() {
-        diccionario = new HashMap<String,String>();
+        diccionario = new HashMap<String, String>();
         soluciones = new TreeSet<String>();
         InputStream is = getResources().openRawResource(R.raw.paraules);
         BufferedReader r = new BufferedReader(new InputStreamReader(is));
@@ -98,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             while ((linea = r.readLine()) != null) {
                 if ((linea.length() - 1) / 2 == LONGITUD) {
                     String valor_palabra[] = linea.split(";");
-                    diccionario.put(valor_palabra[1],valor_palabra[0]);
+                    diccionario.put(valor_palabra[1], valor_palabra[0]);
                     soluciones.add(valor_palabra[1]);
                 }
 
@@ -115,48 +121,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String agafaHTML(String palabra) {
-        StringBuilder data = new StringBuilder();
-        try {
-            URL url = new URL(" https://www.vilaweb.cat/paraulogic/?diec=" + palabra);
-            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            String line = in.readLine();
-            while (line!=null){
-                data.append(line);
-                line = in.readLine();
-            }
 
+        try {
+            URL url = new URL("https://www.vilaweb.cat/paraulogic/?diec=" + palabra);
+
+            InputStreamReader inputStreamReader= new InputStreamReader(url.openStream());
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String line;
+            System.out.println("ghjgjhgjhgjjh");
+            StringBuffer contingut = new StringBuffer();
+            while ((line = bufferedReader.readLine()) != null) {
+                contingut.append(line);
+            }
+            bufferedReader.close();
+            return contingut.toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            System.out.println("error");
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-
-
-        return data.toString();
+        return palabra;
     }
 
-    /*implemnatcion de logica, entra el valor de la plabra introducido por el usuario
-    * */
-    public void logica(String palabraReferencia) {
-       /* hay se cierra la pantalla
 
-       String definicio;
-        try {
-            JSONObject jsonObject = new JSONObject(agafaHTML(palabraReferencia));
-            definicio = jsonObject.getString("d");
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }*/
-        boolean hasGanado= true;
-        if(hasGanado){
+    /*implemnatcion de logica, entra el valor de la plabra introducido por el usuario
+     * */
+    public void logica(String palabraReferencia) {
+        /* hay se cierra la pantalla*/
+
+
+        boolean hasGanado = true;
+        if (hasGanado) {
             Intent intent = new Intent(this, PantallaGanador.class);
-            intent.putExtra(EXTRA_PALABRA,"palabra");
-            intent.putExtra(EXTRA_DEFINCION,"denfinicon");
+            intent.putExtra(EXTRA_PALABRA, "palabra");
+            intent.putExtra(EXTRA_DEFINCION, "denfinicion");
             startActivity(intent);
 
-        }else{
+        } else {
             Intent intent = new Intent(this, PantallaPerdedor.class);
-            intent.putExtra(EXTRA_PALABRA,"palabra");
-            intent.putExtra(EXTRA_DEFINCION,"denfinicon");
-            intent.putExtra(EXTRA_POSSIBLES_PARAULES,"posibles palabras");
+            intent.putExtra(EXTRA_PALABRA, "palabra");
+            intent.putExtra(EXTRA_DEFINCION, "denfinicion");
+            intent.putExtra(EXTRA_RESTRICCIONES, "restricciones");
+            intent.putExtra(EXTRA_POSSIBLES_PARAULES, "posibles palabras");
             startActivity(intent);
         }
 
@@ -180,13 +188,12 @@ public class MainActivity extends AppCompatActivity {
         });*/
 
 
-
-
     }
-    public String obtenirParaula(){
+
+    public String obtenirParaula() {
         StringBuilder aux = new StringBuilder();
-        for(int i = 0; i<longitud_palabra;i++){
-            TextView aux1 = (TextView) findViewById(Integer.parseInt(intentos_actual+""+i));
+        for (int i = 0; i < longitud_palabra; i++) {
+            TextView aux1 = (TextView) findViewById(Integer.parseInt(intentos_actual + "" + i));
             aux.append(aux1.getText());
         }
         return aux.toString();
@@ -263,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
                 if (longitud_palabra > 0 && longitud_palabra <= LONGITUD) {
                     ConstraintLayout b = findViewById(R.id.layout);
                     int posicion = (intentos_actual * 10) + longitud_palabra;
-                    TextView casilla = (TextView) b.getViewById(posicion-1);
+                    TextView casilla = (TextView) b.getViewById(posicion - 1);
                     casilla.setText("");
                     if (longitud_palabra > 0) longitud_palabra--;
                 }
@@ -293,22 +300,50 @@ public class MainActivity extends AppCompatActivity {
                     //agafam la paraula dels text views
                     paraula = obtenirParaula().toLowerCase();
                     //comprobam si existeix la paraula
-                    if(diccionario.containsKey(paraula)){
+                    if (diccionario.containsKey(paraula)) {
                         //si existeix i per tant hem de omplir les restriccions
-                        if(paraula.equals())
-                        //una vegada que hem fet ses reduccions i adiccions als conjunts
-                        //aumentam intentos_actual i posam longitud_palabra a 0
-                        intentos_actual++;
+                        if (paraula.equals(""))
+                            //una vegada que hem fet ses reduccions i adiccions als conjunts
+                            //aumentam intentos_actual i posam longitud_palabra a 0
+                            intentos_actual++;
                         longitud_palabra = 0;
                         System.out.println("la paraula existeix");
                     }
-                   //logica(" ");
+                    String palabraReferencia= "riure";
+                    Thread thread = new Thread ( new Runnable () {
+                        @Override
+                        public void run () {
+                            try {
+
+                                String definicio = "";
+                                try {
+                                    JSONObject jsonObject = new JSONObject(agafaHTML(palabraReferencia));
+                                    definicio = jsonObject.getString("d");
+                                    System.out.println(definicio);
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+
+                            } catch ( Exception e ) {
+                                e . printStackTrace () ;
+                            }
+                        }
+                    }) ;
+                    thread.start();
+                    try {
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    logica("");
+
                     //startActivity(intentGanddor);
-                }else{
+                } else {
                     Context context = getApplicationContext();
                     CharSequence text = "Paraula incompleta!";
                     int duration = Toast.LENGTH_LONG;
-                    Toast toast = Toast.makeText(context,text,duration);
+                    Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 }
 
