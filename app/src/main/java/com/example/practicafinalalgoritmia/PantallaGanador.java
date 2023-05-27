@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
 import android.widget.TextView;
 
 public class PantallaGanador extends AppCompatActivity {
@@ -20,7 +21,7 @@ public class PantallaGanador extends AppCompatActivity {
         TextView definicioTextView = (TextView) findViewById(R.id.textViewDefinicionGanador);
 
         palabraTextView.setText(palabra);
-        definicioTextView.setText(defincio);
+        definicioTextView.setText(Html.fromHtml(defincio,Html.FROM_HTML_MODE_LEGACY));
 
         }
 }

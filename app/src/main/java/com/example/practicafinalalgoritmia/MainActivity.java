@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_DEFINCION = "com.example.myfirstapp.DEFINICION";
     public static final String EXTRA_RESTRICCIONES = "com.example.myfirstapp.RESTRICCIONES";
     public static final String EXTRA_POSSIBLES_PARAULES = "com.example.myfirstapp.POSSIBLES_PARAULES";
+    public String definicio = "";
     /*variables que me condicionan el juego*/
     public final int INTENTOS = 5;
     public final int LONGITUD = 5;
@@ -125,10 +126,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             URL url = new URL("https://www.vilaweb.cat/paraulogic/?diec=" + palabra);
 
-            InputStreamReader inputStreamReader= new InputStreamReader(url.openStream());
+            InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String line;
-            System.out.println("ghjgjhgjhgjjh");
+
             StringBuffer contingut = new StringBuffer();
             while ((line = bufferedReader.readLine()) != null) {
                 contingut.append(line);
@@ -156,13 +157,13 @@ public class MainActivity extends AppCompatActivity {
         if (hasGanado) {
             Intent intent = new Intent(this, PantallaGanador.class);
             intent.putExtra(EXTRA_PALABRA, "palabra");
-            intent.putExtra(EXTRA_DEFINCION, "denfinicion");
+            intent.putExtra(EXTRA_DEFINCION, definicio);
             startActivity(intent);
 
         } else {
             Intent intent = new Intent(this, PantallaPerdedor.class);
             intent.putExtra(EXTRA_PALABRA, "palabra");
-            intent.putExtra(EXTRA_DEFINCION, "denfinicion");
+            intent.putExtra(EXTRA_DEFINCION, definicio);
             intent.putExtra(EXTRA_RESTRICCIONES, "restricciones");
             intent.putExtra(EXTRA_POSSIBLES_PARAULES, "posibles palabras");
             startActivity(intent);
@@ -309,27 +310,25 @@ public class MainActivity extends AppCompatActivity {
                         longitud_palabra = 0;
                         System.out.println("la paraula existeix");
                     }
-                    String palabraReferencia= "riure";
-                    Thread thread = new Thread ( new Runnable () {
+                    String palabraReferencia = "riure";
+                    Thread thread = new Thread(new Runnable() {
                         @Override
-                        public void run () {
+                        public void run() {
                             try {
 
-                                String definicio = "";
+
                                 try {
                                     JSONObject jsonObject = new JSONObject(agafaHTML(palabraReferencia));
                                     definicio = jsonObject.getString("d");
-                                    System.out.println(definicio);
+
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
-
-
-                            } catch ( Exception e ) {
-                                e . printStackTrace () ;
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         }
-                    }) ;
+                    });
                     thread.start();
                     try {
                         thread.join();

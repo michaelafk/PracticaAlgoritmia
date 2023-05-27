@@ -5,6 +5,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
@@ -26,7 +27,8 @@ public class PantallaPerdedor extends AppCompatActivity {
         TextView paraulesPossiblesTextView = (TextView) findViewById(R.id.textViewParaulesPosibles);
 
         palabraTextView.setText(palabra);
-        definicioTextView.setText(defincio);
+
+        definicioTextView.setText(Html.fromHtml(defincio,Html.FROM_HTML_MODE_LEGACY));
         restriccionsTextView.setText(restriccions);
         paraulesPossiblesTextView.setText(paraulesPossibles);
 
