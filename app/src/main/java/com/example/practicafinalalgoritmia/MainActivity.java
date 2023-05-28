@@ -303,12 +303,58 @@ public class MainActivity extends AppCompatActivity {
                     //comprobam si existeix la paraula
                     if (diccionario.containsKey(paraula)) {
                         //si existeix i per tant hem de omplir les restriccions
-                        if (paraula.equals(""))
-                            //una vegada que hem fet ses reduccions i adiccions als conjunts
-                            //aumentam intentos_actual i posam longitud_palabra a 0
-                            intentos_actual++;
+                        if (paraula.equals("")) {
+                           //si s'ha paruala es la correcta donncs no actualitzam ses restriccions i solucions
+                            //pasar a pantalla de ganador
+                        }else{
+                            //hem d'actualitzar restriccions i solucions
+                            char p [] = paraula.toUpperCase().toCharArray();
+                            for(int i = 0;i < p.length;i++){
+                                UnsortedLinkedListSet<Integer> list = (UnsortedLinkedListSet<Integer>) registroPalabraActual.get(p[i]);
+                                TextView aux1 = (TextView) findViewById(Integer.parseInt(intentos_actual + "" + i));
+                                GradientDrawable gd = new GradientDrawable();
+                                if(list.isEmpty()){
+                                    //la lletra no hi esta en la paraula
+                                    restricciones.put(p[i],new UnsortedLinkedListSet<Integer>());
+                                    gd.setColor(Color.RED);
+                                }else{
+                                    //la lletra si esta, de aqui tenim dos posibilitats, que hi este en sa posicio correcta o
+                                    //que no hi esta en sa posicio correcta
+                                    if(list.contains(i)){
+                                        //la lletra esta en sa posicio correcta
+                                        UnsortedLinkedListSet<Integer> aux2 = restricciones.get(p[i]);
+                                        if(restricciones.get(p[i])!=null){
+                                            //si hi esta la restriccio
+                                            aux2.add(i);
+                                            restricciones.put(p[i],aux2);
+                                        }else{
+                                            //no hi esta la restriccio
+                                            UnsortedLinkedListSet<Integer> aux3 = new UnsortedLinkedListSet<>();
+                                            aux3.add(i);
+                                            restricciones.put(p[i],aux3);
+                                        }
+                                        gd.setColor(Color.GREEN);
+                                    }else{
+                                        //la lletra esta en sa posicio incorrecta
+                                        UnsortedLinkedListSet<Integer> aux2 = restricciones.get(p[i]);
+                                        if(restricciones.get(p[i])!=null){
+                                            //si hi esta la restriccio
+                                            aux2.add(-1);
+                                            restricciones.put(p[i],aux2);
+                                        }else{
+                                            //no hi esta la restriccio
+                                            UnsortedLinkedListSet<Integer> aux3 = new UnsortedLinkedListSet<>();
+                                            aux3.add(-1);
+                                            restricciones.put(p[i],aux3);
+                                        }
+                                        gd.setColor(Color.YELLOW);
+                                    }
+                                }
+                                aux1.setBackground(gd);
+                            }
+                        }
+                        intentos_actual++;
                         longitud_palabra = 0;
-                        System.out.println("la paraula existeix");
                     }
                     String palabraReferencia = "riure";
                     Thread thread = new Thread(new Runnable() {
