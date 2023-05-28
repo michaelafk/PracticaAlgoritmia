@@ -25,17 +25,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity {
     /*Definicones para enviar los datos a otras pantallas*/
@@ -43,12 +40,16 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_DEFINCION = "com.example.myfirstapp.DEFINICION";
     public static final String EXTRA_RESTRICCIONES = "com.example.myfirstapp.RESTRICCIONES";
     public static final String EXTRA_POSSIBLES_PARAULES = "com.example.myfirstapp.POSSIBLES_PARAULES";
-    public String definicio = "";
+    public String definicio;
+    public String palabraSelecionada;
+    public String posibles;
+    public String restriccionesDatos;
     /*variables que me condicionan el juego*/
     public final int INTENTOS = 5;
     public final int LONGITUD = 5;
     public int intentos_actual = 0;
     public int longitud_palabra = 0;
+    public boolean hasGanado;
     public String Paraula_Seleccionada;
     /*fin de variables de condicionamiento de juego*/
     /*medidas para poder implementar los textviews*/
@@ -89,13 +90,47 @@ public class MainActivity extends AppCompatActivity {
         crearGraella();
         crearTeclat();
     }
-
+    /*se llama a para obtener la definicion aleatoria solo uno vez cuando se carga la pantalla pricipal
+    * */
     @Override
     protected void onStart() {
         super.onStart();
+        obtenerDefinicon();
+        //resetValoresYDeStructurasConjuntos();
     }
+    /* se puede separa la carga de datos y manterner los datos de soluciones, usar un copia de solucione en ves vaciar el mismo
+    * tambien la limpieza de "datos" de las interfaz"*/
+    @Deprecated
+    private void resetValoresYDeStructurasConjuntos(){
+        if(hasGanado)soluciones = new TreeSet<String>();
+    }
+    private void obtenerDefinicon(){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    try {
+                        JSONObject jsonObject = new JSONObject(agafaHTML(palabraSelecionada));
+                        definicio = jsonObject.getString("d");
 
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
     private void cargarDatos() {
+        this.hasGanado = false;
         diccionario = new HashMap<String, String>();
         soluciones = new TreeSet<String>();
         InputStream is = getResources().openRawResource(R.raw.paraules);
@@ -110,6 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
+            Random random = new Random();
+            this.palabraSelecionada = (String) diccionario.keySet().stream().skip(random.nextInt(diccionario.size())).findFirst().orElse(null);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -147,48 +184,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /*implemnatcion de logica, entra el valor de la plabra introducido por el usuario
+    /*implemnatcion de logica de las pantallas, donde se procesan para convertilos en String el map
+     *de restricciones y el set posibles palabras
      * */
-    public void logica(String palabraReferencia) {
+    public void logica(TreeMap<Character, UnsortedLinkedListSet<Integer>> restricciones, TreeSet<String> palabrasPosibles) {
         /* hay se cierra la pantalla*/
-
-
-        boolean hasGanado = true;
         if (hasGanado) {
             Intent intent = new Intent(this, PantallaGanador.class);
-            intent.putExtra(EXTRA_PALABRA, "palabra");
+            intent.putExtra(EXTRA_PALABRA, palabraSelecionada);
             intent.putExtra(EXTRA_DEFINCION, definicio);
             startActivity(intent);
 
         } else {
             Intent intent = new Intent(this, PantallaPerdedor.class);
-            intent.putExtra(EXTRA_PALABRA, "palabra");
+            intent.putExtra(EXTRA_PALABRA, palabraSelecionada);
             intent.putExtra(EXTRA_DEFINCION, definicio);
             intent.putExtra(EXTRA_RESTRICCIONES, "restricciones");
             intent.putExtra(EXTRA_POSSIBLES_PARAULES, "posibles palabras");
             startActivity(intent);
         }
-
-
-
-        /*Intent intent = new Intent(this, PantallaGanador.class);
-        startActivity(intent);
-        AtomicBoolean letrasIguales = new AtomicBoolean(true);
-        soluciones.forEach((key, value) -> {
-
-            for (int i = 0; i < palabraReferencia.length(); i++) {
-                if ((key.charAt(i) != palabraReferencia.charAt(i))) {
-                    letrasIguales.set(false);
-                    break;
-                }
-            }
-            if (letrasIguales.get()) {
-                //soluciones.put(soluciones.);
-            }
-
-        });*/
-
-
     }
 
     public String obtenirParaula() {
@@ -303,49 +317,50 @@ public class MainActivity extends AppCompatActivity {
                     //comprobam si existeix la paraula
                     if (diccionario.containsKey(paraula)) {
                         //si existeix i per tant hem de omplir les restriccions
-                        if (paraula.equals("")) {
-                           //si s'ha paruala es la correcta donncs no actualitzam ses restriccions i solucions
+                        if (paraula.equals(palabraSelecionada)) {
+                            //si s'ha paruala es la correcta donncs no actualitzam ses restriccions i solucions
                             //pasar a pantalla de ganador
-                        }else{
+                            hasGanado = true;
+                        } else {
                             //hem d'actualitzar restriccions i solucions
-                            char p [] = paraula.toUpperCase().toCharArray();
-                            for(int i = 0;i < p.length;i++){
+                            char p[] = paraula.toUpperCase().toCharArray();
+                            for (int i = 0; i < p.length; i++) {
                                 UnsortedLinkedListSet<Integer> list = (UnsortedLinkedListSet<Integer>) registroPalabraActual.get(p[i]);
                                 TextView aux1 = (TextView) findViewById(Integer.parseInt(intentos_actual + "" + i));
                                 GradientDrawable gd = new GradientDrawable();
-                                if(list.isEmpty()){
+                                if (list.isEmpty()) {
                                     //la lletra no hi esta en la paraula
-                                    restricciones.put(p[i],new UnsortedLinkedListSet<Integer>());
+                                    restricciones.put(p[i], new UnsortedLinkedListSet<Integer>());
                                     gd.setColor(Color.RED);
-                                }else{
+                                } else {
                                     //la lletra si esta, de aqui tenim dos posibilitats, que hi este en sa posicio correcta o
                                     //que no hi esta en sa posicio correcta
-                                    if(list.contains(i)){
+                                    if (list.contains(i)) {
                                         //la lletra esta en sa posicio correcta
                                         UnsortedLinkedListSet<Integer> aux2 = restricciones.get(p[i]);
-                                        if(restricciones.get(p[i])!=null){
+                                        if (restricciones.get(p[i]) != null) {
                                             //si hi esta la restriccio
                                             aux2.add(i);
-                                            restricciones.put(p[i],aux2);
-                                        }else{
+                                            restricciones.put(p[i], aux2);
+                                        } else {
                                             //no hi esta la restriccio
                                             UnsortedLinkedListSet<Integer> aux3 = new UnsortedLinkedListSet<>();
                                             aux3.add(i);
-                                            restricciones.put(p[i],aux3);
+                                            restricciones.put(p[i], aux3);
                                         }
                                         gd.setColor(Color.GREEN);
-                                    }else{
+                                    } else {
                                         //la lletra esta en sa posicio incorrecta
                                         UnsortedLinkedListSet<Integer> aux2 = restricciones.get(p[i]);
-                                        if(restricciones.get(p[i])!=null){
+                                        if (restricciones.get(p[i]) != null) {
                                             //si hi esta la restriccio
                                             aux2.add(-1);
-                                            restricciones.put(p[i],aux2);
-                                        }else{
+                                            restricciones.put(p[i], aux2);
+                                        } else {
                                             //no hi esta la restriccio
                                             UnsortedLinkedListSet<Integer> aux3 = new UnsortedLinkedListSet<>();
                                             aux3.add(-1);
-                                            restricciones.put(p[i],aux3);
+                                            restricciones.put(p[i], aux3);
                                         }
                                         gd.setColor(Color.YELLOW);
                                     }
@@ -356,35 +371,11 @@ public class MainActivity extends AppCompatActivity {
                         intentos_actual++;
                         longitud_palabra = 0;
                     }
-                    String palabraReferencia = "riure";
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
+                    String palabraReferencia = palabraSelecionada;
 
-
-                                try {
-                                    JSONObject jsonObject = new JSONObject(agafaHTML(palabraReferencia));
-                                    definicio = jsonObject.getString("d");
-
-                                } catch (JSONException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    thread.start();
-                    try {
-                        thread.join();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    logica("");
 
                     //startActivity(intentGanddor);
-                } else {
+                }  else {
                     Context context = getApplicationContext();
                     CharSequence text = "Paraula incompleta!";
                     int duration = Toast.LENGTH_LONG;
