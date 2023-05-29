@@ -90,21 +90,25 @@ public class MainActivity extends AppCompatActivity {
         crearGraella();
         crearTeclat();
     }
+
     /*se llama a para obtener la definicion aleatoria solo uno vez cuando se carga la pantalla pricipal
-    * */
+     * */
     @Override
     protected void onStart() {
         super.onStart();
         obtenerDefinicon();
+        restricciones = new TreeMap<>();
         //resetValoresYDeStructurasConjuntos();
     }
+
     /* se puede separa la carga de datos y manterner los datos de soluciones, usar un copia de solucione en ves vaciar el mismo
-    * tambien la limpieza de "datos" de las interfaz"*/
+     * tambien la limpieza de "datos" de las interfaz"*/
     @Deprecated
-    private void resetValoresYDeStructurasConjuntos(){
-        if(hasGanado)soluciones = new TreeSet<String>();
+    private void resetValoresYDeStructurasConjuntos() {
+        if (hasGanado) soluciones = new TreeSet<String>();
     }
-    private void obtenerDefinicon(){
+
+    private void obtenerDefinicon() {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -129,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
     private void cargarDatos() {
         this.hasGanado = false;
         diccionario = new HashMap<String, String>();
@@ -321,16 +326,21 @@ public class MainActivity extends AppCompatActivity {
                             //si s'ha paruala es la correcta donncs no actualitzam ses restriccions i solucions
                             //pasar a pantalla de ganador
                             hasGanado = true;
+                            logica(restricciones, soluciones);
                         } else {
-                            //hem d'actualitzar restriccions i solucions
-                            char p[] = paraula.toUpperCase().toCharArray();
+                            //hem d'actualitzar restriccions i solucions ¿porque upper case, sepuede llamar cuando se tenga que cambiar el color?
+                            char p[] = paraula.toCharArray();
+
                             for (int i = 0; i < p.length; i++) {
                                 UnsortedLinkedListSet<Integer> list = (UnsortedLinkedListSet<Integer>) registroPalabraActual.get(p[i]);
-                                TextView aux1 = (TextView) findViewById(Integer.parseInt(intentos_actual + "" + i));
+                                TextView aux1 = (TextView) findViewById((intentos_actual * 10) + i);
+                                //la vairable se reinicia
                                 GradientDrawable gd = new GradientDrawable();
-                                if (list.isEmpty()) {
+                                // si no esta instacianda es null
+                                if (list == null) {
                                     //la lletra no hi esta en la paraula
                                     restricciones.put(p[i], new UnsortedLinkedListSet<Integer>());
+                                    //no hace falta establececolor aqui o si?
                                     gd.setColor(Color.RED);
                                 } else {
                                     //la lletra si esta, de aqui tenim dos posibilitats, que hi este en sa posicio correcta o
@@ -370,12 +380,16 @@ public class MainActivity extends AppCompatActivity {
                         }
                         intentos_actual++;
                         longitud_palabra = 0;
+                    } else {
+                        Context context = getApplicationContext();
+                        CharSequence text = "La paraula no existeix";
+                        int duration = Toast.LENGTH_LONG;
+                        Toast toast = Toast.makeText(context, text, duration);
+                        toast.show();
                     }
-                    String palabraReferencia = palabraSelecionada;
 
 
-                    //startActivity(intentGanddor);
-                }  else {
+                } else {
                     Context context = getApplicationContext();
                     CharSequence text = "Paraula incompleta!";
                     int duration = Toast.LENGTH_LONG;
@@ -388,9 +402,6 @@ public class MainActivity extends AppCompatActivity {
         constraintLayout.addView(bottonComprobar);
 
     }
-
-
-    ;
 
     public Button CreateButton(int X, int Y, Character ch) {
         Button aux = new Button(this);
