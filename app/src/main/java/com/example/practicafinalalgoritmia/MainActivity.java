@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     public int intentos_actual = 0;
     public int longitud_palabra = 0;
     public boolean hasGanado;
-    public String Paraula_Seleccionada;
+    public String paraula_Seleccionada;
     /*fin de variables de condicionamiento de juego*/
     /*medidas para poder implementar los textviews*/
     public int MaxHeightDisplay;
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     /*fin de variables de etapa y posicionamiento*/
     /*estructuras que se van a usar globalmente*/
     public UnsortedArrayMapping registroPalabraActual;
-    public HashMap diccionario;
+    public HashMap<String, String> diccionario;
     public TreeSet<String> soluciones;
     //-1 esta, value list como el teclado
     public TreeMap<Character, UnsortedLinkedListSet<Integer>> restricciones; //si
@@ -109,12 +109,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void obtenerDefinicon() {
+        Random random = new Random();
+        this.palabraSelecionada = (String) diccionario.keySet().stream().skip(random.nextInt(diccionario.size())).findFirst().orElse(null);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     try {
-                        JSONObject jsonObject = new JSONObject(agafaHTML(palabraSelecionada));
+                        JSONObject jsonObject = new JSONObject(agafaHTML(diccionario.get(palabraSelecionada)));
                         definicio = jsonObject.getString("d");
 
                     } catch (JSONException e) {
@@ -144,14 +146,13 @@ public class MainActivity extends AppCompatActivity {
             String linea;
             while ((linea = r.readLine()) != null) {
                 if ((linea.length() - 1) / 2 == LONGITUD) {
-                    String valor_palabra[] = linea.split(";");
+                    String[] valor_palabra = linea.split(";");
                     diccionario.put(valor_palabra[1], valor_palabra[0]);
                     soluciones.add(valor_palabra[1]);
                 }
 
             }
-            Random random = new Random();
-            this.palabraSelecionada = (String) diccionario.keySet().stream().skip(random.nextInt(diccionario.size())).findFirst().orElse(null);
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -331,10 +332,31 @@ public class MainActivity extends AppCompatActivity {
                             //hem d'actualitzar restriccions i solucions ¿porque upper case, sepuede llamar cuando se tenga que cambiar el color?
                             char p[] = paraula.toCharArray();
 
-                            for (int i = 0; i < p.length; i++) {
+                            for (int i = 0; i < p.length; i++) {//
                                 UnsortedLinkedListSet<Integer> list = (UnsortedLinkedListSet<Integer>) registroPalabraActual.get(p[i]);
-                                TextView aux1 = (TextView) findViewById((intentos_actual * 10) + i);
+                                TextView caracter = (TextView) findViewById((intentos_actual * 10) + i);
                                 //la vairable se reinicia
+                                int posicion = palabraSelecionada.indexOf(caracter.getText().toString().toLowerCase(Locale.ROOT).charAt(0));
+                                //mira si el caracter esta en el la plalbra
+                                //falta añadi comprobacion si ya esta puesta no pasa a amarillo
+                                if (posicion != -1) {
+                                    //cambiar color del teclado, text view y añadir a restriciones
+
+                                    //añadi comprobacion si ya esta puesta
+                                    if (i == posicion) {
+                                        caracter.setBackgroundColor(Color.GREEN);
+                                        caracter.invalidate();
+                                    } else {
+                                        caracter.setBackgroundColor(Color.YELLOW);
+                                        caracter.invalidate();
+                                    }
+
+                                } else {
+
+                                    caracter.setBackgroundColor(Color.RED);
+                                    caracter.invalidate();
+                                    System.out.println("El carácter no se encuentra en el String");
+                                }/*
                                 GradientDrawable gd = new GradientDrawable();
                                 // si no esta instacianda es null
                                 if (list == null) {
@@ -375,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                                         gd.setColor(Color.YELLOW);
                                     }
                                 }
-                                aux1.setBackground(gd);
+                                caracter.setBackground(gd);*/
                             }
                         }
                         intentos_actual++;
