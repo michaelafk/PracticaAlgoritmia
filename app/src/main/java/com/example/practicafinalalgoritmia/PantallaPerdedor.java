@@ -27,8 +27,10 @@ public class PantallaPerdedor extends AppCompatActivity {
         TextView paraulesPossiblesTextView = (TextView) findViewById(R.id.textViewParaulesPosibles);
 
         palabraTextView.setText(palabra);
-
-        definicioTextView.setText(Html.fromHtml(defincio,Html.FROM_HTML_MODE_LEGACY));
+        if (defincio==null){
+            defincio ="error no se pudo optener definicion";
+        }
+        definicioTextView.setText(Html.fromHtml(defincio,Html.FROM_HTML_MODE_COMPACT));
         restriccionsTextView.setText(restriccions);
         paraulesPossiblesTextView.setText(paraulesPossibles);
 

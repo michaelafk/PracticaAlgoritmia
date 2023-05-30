@@ -45,11 +45,11 @@ public class MainActivity extends AppCompatActivity {
     public String posibles;
     public String restriccionesDatos;
     /*variables que me condicionan el juego*/
-    public final int INTENTOS = 5;
+    public final int INTENTOS = 2;
     public final int LONGITUD = 5;
     public int intentos_actual = 0;
     public int longitud_palabra = 0;
-    public boolean hasGanado;
+    public boolean hasGanado = true;
     public String paraula_Seleccionada;
     /*fin de variables de condicionamiento de juego*/
     /*medidas para poder implementar los textviews*/
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     public int pospalabra = 0;
     /*fin de variables de etapa y posicionamiento*/
     /*estructuras que se van a usar globalmente*/
-    public UnsortedArrayMapping registroPalabraActual;
+    public UnsortedArrayMapping<Character, UnsortedLinkedListSet<Integer>> registroPalabraActual;
     public HashMap<String, String> diccionario;
     public TreeSet<String> soluciones;
     //-1 esta, value list como el teclado
@@ -86,31 +86,27 @@ public class MainActivity extends AppCompatActivity {
         TextViewHeight = (MaxWidthDisplay / LONGITUD) - 10;
         ButtonHeight = (MaxWidthDisplay / 8) - 10;
         ButtonWidth = (MaxWidthDisplay / 8) - 10;
+
         cargarDatos();
         crearGraella();
         crearTeclat();
     }
 
     /*se llama a para obtener la definicion aleatoria solo uno vez cuando se carga la pantalla pricipal
-     * */
+     * reset de conjuntos del mapping*/
     @Override
     protected void onStart() {
         super.onStart();
-        obtenerDefinicon();
-        restricciones = new TreeMap<>();
-        //resetValoresYDeStructurasConjuntos();
+        obtenerDefinicion();
+        CreateStructureMapping();
+
     }
 
-    /* se puede separa la carga de datos y manterner los datos de soluciones, usar un copia de solucione en ves vaciar el mismo
-     * tambien la limpieza de "datos" de las interfaz"*/
-    @Deprecated
-    private void resetValoresYDeStructurasConjuntos() {
-        if (hasGanado) soluciones = new TreeSet<String>();
-    }
-
-    private void obtenerDefinicon() {
+    private void obtenerDefinicion() {
         Random random = new Random();
         this.palabraSelecionada = (String) diccionario.keySet().stream().skip(random.nextInt(diccionario.size())).findFirst().orElse(null);
+        assert palabraSelecionada != null;
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -193,8 +189,9 @@ public class MainActivity extends AppCompatActivity {
     /*implemnatcion de logica de las pantallas, donde se procesan para convertilos en String el map
      *de restricciones y el set posibles palabras
      * */
-    public void logica(TreeMap<Character, UnsortedLinkedListSet<Integer>> restricciones, TreeSet<String> palabrasPosibles) {
+    public void logica(UnsortedArrayMapping<Character, UnsortedLinkedListSet<Integer>> restricciones, TreeSet<String> palabrasPosibles) {
         /* hay se cierra la pantalla*/
+
         if (hasGanado) {
             Intent intent = new Intent(this, PantallaGanador.class);
             intent.putExtra(EXTRA_PALABRA, palabraSelecionada);
@@ -202,11 +199,41 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
 
         } else {
+            StringBuilder palabras = new StringBuilder();
+            StringBuilder restriccionesTexto = new StringBuilder();
+            palabras.append("Paraules posibles: ");
+            restriccionesTexto.append("Restriccions: ");
+
+            for (String palabra : palabrasPosibles) {
+                palabras.append(palabra + ", ");
+            }
+            Iterator it = restricciones.iterator();
+
+            while (it.hasNext()) {
+                UnsortedArrayMapping.Pair p = (UnsortedArrayMapping.Pair) it.next();
+                Character caracter = (Character) p.getKey();
+                UnsortedLinkedListSet<Integer> lista = (UnsortedLinkedListSet<Integer>) p.getValue();
+                Iterator itList = lista.iterator();
+                while (itList.hasNext()) {
+                    Integer next = (Integer) itList.next();
+                    if (next == -1) {
+                        restriccionesTexto.append("no ha de contenir " + caracter + ", ");
+                    } else {
+                        restriccionesTexto.append("ha de contenir la " + caracter + " en la posició " + next + ", ");
+                    }
+                }
+            }
+            int lastIndex = restriccionesTexto.length() - 2;
+            char nuevoCaracter = '.';
+            restriccionesTexto.setCharAt(lastIndex, nuevoCaracter);
+            lastIndex = palabras.length() - 2;
+            palabras.setCharAt(lastIndex, nuevoCaracter);
+
             Intent intent = new Intent(this, PantallaPerdedor.class);
             intent.putExtra(EXTRA_PALABRA, palabraSelecionada);
             intent.putExtra(EXTRA_DEFINCION, definicio);
-            intent.putExtra(EXTRA_RESTRICCIONES, "restricciones");
-            intent.putExtra(EXTRA_POSSIBLES_PARAULES, "posibles palabras");
+            intent.putExtra(EXTRA_RESTRICCIONES, restriccionesTexto.toString());
+            intent.putExtra(EXTRA_POSSIBLES_PARAULES, palabras.toString());
             startActivity(intent);
         }
     }
@@ -323,40 +350,58 @@ public class MainActivity extends AppCompatActivity {
                     //comprobam si existeix la paraula
                     if (diccionario.containsKey(paraula)) {
                         //si existeix i per tant hem de omplir les restriccions
+
                         if (paraula.equals(palabraSelecionada)) {
                             //si s'ha paruala es la correcta donncs no actualitzam ses restriccions i solucions
                             //pasar a pantalla de ganador
                             hasGanado = true;
-                            logica(restricciones, soluciones);
+                            intentos_actual = 0;
+                            longitud_palabra = 0;
+                            logica(registroPalabraActual, eliminarSolucionesNoValidas(registroPalabraActual));
                         } else {
                             //hem d'actualitzar restriccions i solucions ¿porque upper case, sepuede llamar cuando se tenga que cambiar el color?
-                            char p[] = paraula.toCharArray();
+                            char[] p = paraula.toCharArray();
 
-                            for (int i = 0; i < p.length; i++) {//
-                                UnsortedLinkedListSet<Integer> list = (UnsortedLinkedListSet<Integer>) registroPalabraActual.get(p[i]);
+                            for (int i = 0; i < p.length; i++) {
+                                //UnsortedLinkedListSet<Integer> list = (UnsortedLinkedListSet<Integer>) registroPalabraActual.get(p[i]);
                                 TextView caracter = (TextView) findViewById((intentos_actual * 10) + i);
                                 //la vairable se reinicia
                                 int posicion = palabraSelecionada.indexOf(caracter.getText().toString().toLowerCase(Locale.ROOT).charAt(0));
+                                char c = caracter.getText().charAt(0);
                                 //mira si el caracter esta en el la plalbra
                                 //falta añadi comprobacion si ya esta puesta no pasa a amarillo
                                 if (posicion != -1) {
                                     //cambiar color del teclado, text view y añadir a restriciones
-
                                     //añadi comprobacion si ya esta puesta
                                     if (i == posicion) {
                                         caracter.setBackgroundColor(Color.GREEN);
+                                        UnsortedLinkedListSet<Integer> res = registroPalabraActual.get(c);
+                                        //se vuelve a recorre otraves la palabra actual y se mira si hay alguna que esta y la pone en rojo
+                                        if (res == null) {
+                                            res = new UnsortedLinkedListSet<Integer>();
+                                        }
+                                        res.add(i + 1);
+                                        registroPalabraActual.put(c, res);
                                         caracter.invalidate();
                                     } else {
+
                                         caracter.setBackgroundColor(Color.YELLOW);
                                         caracter.invalidate();
+
                                     }
 
                                 } else {
-
                                     caracter.setBackgroundColor(Color.RED);
+                                    UnsortedLinkedListSet<Integer> res = registroPalabraActual.get(c);
+
+                                    if (res == null) {
+                                        res = new UnsortedLinkedListSet<Integer>();
+                                    }
+                                    res.add(-1);
+                                    registroPalabraActual.put(c, res);
                                     caracter.invalidate();
-                                    System.out.println("El carácter no se encuentra en el String");
-                                }/*
+                                }
+                                /*
                                 GradientDrawable gd = new GradientDrawable();
                                 // si no esta instacianda es null
                                 if (list == null) {
@@ -399,9 +444,15 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 caracter.setBackground(gd);*/
                             }
+
                         }
                         intentos_actual++;
                         longitud_palabra = 0;
+                        if (intentos_actual == INTENTOS) {
+                            hasGanado = false;
+                            intentos_actual = 0;
+                            logica(registroPalabraActual, eliminarSolucionesNoValidas(registroPalabraActual));
+                        }
                     } else {
                         Context context = getApplicationContext();
                         CharSequence text = "La paraula no existeix";
@@ -409,8 +460,6 @@ public class MainActivity extends AppCompatActivity {
                         Toast toast = Toast.makeText(context, text, duration);
                         toast.show();
                     }
-
-
                 } else {
                     Context context = getApplicationContext();
                     CharSequence text = "Paraula incompleta!";
@@ -425,7 +474,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private TreeSet<String> eliminarSolucionesNoValidas(UnsortedArrayMapping<Character, UnsortedLinkedListSet<Integer>> restricciones) {
+        TreeSet treeSet = (TreeSet) soluciones.clone();
+
+        for (String palabra : soluciones) {
+            Iterator it = restricciones.iterator();
+
+            while (it.hasNext()) {
+                UnsortedArrayMapping.Pair p = (UnsortedArrayMapping.Pair) it.next();
+                Character caracter = (Character) p.getKey();
+                UnsortedLinkedListSet<Integer> lista = (UnsortedLinkedListSet<Integer>) p.getValue();
+                Iterator itList = lista.iterator();
+                TreeSet treeSetAux = new TreeSet<>();
+                while (itList.hasNext()) {
+                    Integer next = (Integer) itList.next();
+                    if(next==-1){
+                        if(palabra.contains(caracter.toString().toLowerCase(Locale.ROOT))){
+                            treeSet.remove(palabra);
+                        }
+                    }
+                }
+
+            }
+
+        }
+        return treeSet;
+    }
+
     public Button CreateButton(int X, int Y, Character ch) {
+
+        final int ID_AUX = 100;
         Button aux = new Button(this);
         aux.setOnClickListener(new View.OnClickListener() {
 
@@ -439,9 +517,9 @@ public class MainActivity extends AppCompatActivity {
                     casilla.setTextColor(Color.GRAY);
                     casilla.setText(ch.toString());
                     casilla.setGravity(Gravity.CENTER);
-
                     longitud_palabra++;
                 }
+
 
             }
         });
@@ -450,6 +528,7 @@ public class MainActivity extends AppCompatActivity {
         aux.setText(text);
         aux.setLayoutParams(layoutParams);
         // Posicionar el TextView
+        aux.setId(ID_AUX + ch);
         aux.setX(X);
         aux.setY(Y);
         return aux;
@@ -479,7 +558,8 @@ public class MainActivity extends AppCompatActivity {
         char[] character = "abcdefghijklmnopqrstuvwxyzç".toUpperCase(Locale.ROOT).toCharArray();
         registroPalabraActual = new UnsortedArrayMapping<Character, UnsortedLinkedListSet<Integer>>(character.length);
         UnsortedLinkedListSet<Integer> listaPosPal;
-        boolean change = true;
+
+
         for (int i = 0; i < character.length; i++) {
             listaPosPal = new UnsortedLinkedListSet<Integer>();
             registroPalabraActual.put(character[i], listaPosPal);

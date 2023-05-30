@@ -21,6 +21,9 @@ public class PantallaGanador extends AppCompatActivity {
         TextView definicioTextView = (TextView) findViewById(R.id.textViewDefinicionGanador);
 
         palabraTextView.setText(palabra);
+        if (defincio==null){
+            defincio ="error no se pudo optener definicion";
+        }
         definicioTextView.setText(Html.fromHtml(defincio,Html.FROM_HTML_MODE_LEGACY));
 
         }

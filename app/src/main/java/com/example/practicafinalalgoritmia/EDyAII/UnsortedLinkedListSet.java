@@ -21,7 +21,7 @@ public class UnsortedLinkedListSet<E> implements Set<E> {
     }
 
     public boolean contains(E elem) {
-         Node p= first;
+         Node p = first;
          boolean trobat = false;
          while (p!= null && !trobat){
              trobat = p.item.equals(elem);
@@ -87,7 +87,6 @@ public class UnsortedLinkedListSet<E> implements Set<E> {
         public Object next() {
             E elem = indexIterator.item;
             indexIterator= indexIterator.next;
-
             return elem;
             
         }

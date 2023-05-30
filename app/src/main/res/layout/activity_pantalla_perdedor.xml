@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="TextView"
+        app:layout_constraintEnd_toEndOf="@+id/textViewDefincion"
         app:layout_constraintStart_toStartOf="@+id/textViewDefincion"
         app:layout_constraintTop_toBottomOf="@+id/textViewDefincion" />
 
@@ -35,6 +36,7 @@
         android:layout_marginTop="10dp"
         android:text="TextView"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/textViewRestriccio"
         app:layout_constraintStart_toStartOf="@+id/textViewRestriccio"
         app:layout_constraintTop_toBottomOf="@+id/textViewRestriccio"
         app:layout_constraintVertical_bias="0.0" />
@@ -53,9 +55,9 @@
         android:id="@+id/textViewDefincion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
         android:layout_marginTop="4dp"
         android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewParaula" />
 </androidx.constraintlayout.widget.ConstraintLayout>
