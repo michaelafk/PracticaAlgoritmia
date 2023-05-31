@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public String posibles;
     public String restriccionesDatos;
     /*variables que me condicionan el juego*/
-    public final int INTENTOS = 2;
+    public final int INTENTOS = 3;
     public final int LONGITUD = 5;
     public int intentos_actual = 0;
     public int longitud_palabra = 0;
@@ -369,14 +369,14 @@ public class MainActivity extends AppCompatActivity {
                                 int posicion = palabraSelecionada.indexOf(caracter.getText().toString().toLowerCase(Locale.ROOT).charAt(0));
                                 char c = caracter.getText().charAt(0);
                                 //mira si el caracter esta en el la plalbra
-                                //falta añadi comprobacion si ya esta puesta no pasa a amarillo
+                                //mira si esta en la posicion que toca
                                 if (posicion != -1) {
                                     //cambiar color del teclado, text view y añadir a restriciones
                                     //añadi comprobacion si ya esta puesta
                                     if (i == posicion) {
                                         caracter.setBackgroundColor(Color.GREEN);
                                         UnsortedLinkedListSet<Integer> res = registroPalabraActual.get(c);
-                                        //se vuelve a recorre otraves la palabra actual y se mira si hay alguna que esta y la pone en rojo
+
                                         if (res == null) {
                                             res = new UnsortedLinkedListSet<Integer>();
                                         }
@@ -384,16 +384,12 @@ public class MainActivity extends AppCompatActivity {
                                         registroPalabraActual.put(c, res);
                                         caracter.invalidate();
                                     } else {
-
                                         caracter.setBackgroundColor(Color.YELLOW);
                                         caracter.invalidate();
-
                                     }
-
                                 } else {
                                     caracter.setBackgroundColor(Color.RED);
                                     UnsortedLinkedListSet<Integer> res = registroPalabraActual.get(c);
-
                                     if (res == null) {
                                         res = new UnsortedLinkedListSet<Integer>();
                                     }
@@ -448,6 +444,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         intentos_actual++;
                         longitud_palabra = 0;
+
                         if (intentos_actual == INTENTOS) {
                             hasGanado = false;
                             intentos_actual = 0;
@@ -485,18 +482,24 @@ public class MainActivity extends AppCompatActivity {
                 Character caracter = (Character) p.getKey();
                 UnsortedLinkedListSet<Integer> lista = (UnsortedLinkedListSet<Integer>) p.getValue();
                 Iterator itList = lista.iterator();
-                TreeSet treeSetAux = new TreeSet<>();
-                while (itList.hasNext()) {
+                char caracteNesesario = caracter.toString().toLowerCase(Locale.ROOT).charAt(0);
+                boolean palabraValidada = true;
+                while (itList.hasNext() && palabraValidada) {
                     Integer next = (Integer) itList.next();
-                    if(next==-1){
-                        if(palabra.contains(caracter.toString().toLowerCase(Locale.ROOT))){
+                    if (next == -1) {
+                        if (palabra.contains(String.valueOf(caracteNesesario))) {
                             treeSet.remove(palabra);
+                        }
+                    } else if (next != null) {
+                        if (palabra.charAt(next) != caracteNesesario) {
+                            palabraValidada = false;
                         }
                     }
                 }
-
+                if (!palabraValidada) {
+                    treeSet.remove(palabra);
+                }
             }
-
         }
         return treeSet;
     }
